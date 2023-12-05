@@ -38,40 +38,42 @@ let part1 : string -> string = fun input -> (
 )
 
 let numbersAscendingByLenght = ["1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"; "one"; "two"; "six"; "four"; "five"; "nine"; "three"; "seven"; "eight"]
-let stringToNumber : string -> option<int> = fun s ->
-    let triplet = numbersAscendingByLenght |> List.map (fun x ->
-        let index = s.IndexOf x
-        if index = -1 then None else Some(x; index)
+let getNumberInString : string * bool -> option<int> = fun s ->
+    let numberAndIndex = numbersAscendingByLenght |> List.map (fun x ->
+        let index = if snd s = true then (fst s).IndexOf x else (fst s).LastIndexOf x
+        if index = -1 
+        then None 
+        else 
+        match x with
+        | "1"
+        | "one" -> Some(1, index)
+        | "2"
+        | "two" -> Some(2, index)
+        | "3"
+        | "three" -> Some(3, index)
+        | "4"
+        | "four" -> Some(4, index)
+        | "5"
+        | "five" -> Some(5, index)
+        | "6"
+        | "six" -> Some(6, index)
+        | "7"
+        | "seven" -> Some(7, index)
+        | "8"
+        | "eight" -> Some(8, index)
+        | "9"
+        | "nine" -> Some(9, index)
+        | _ -> None
     )
 
+    let firstNumberInWindow = numberAndIndex |> List.filter (fun x -> x.IsSome) |> (if snd s = true then List.sortBy (fun x -> snd x.Value ) else List.sortByDescending (fun x -> snd x.Value)) |> List.tryHead
+    if firstNumberInWindow.IsSome then Some(fst firstNumberInWindow.Value.Value) else None
     
-    match  with
-        | "1"
-        | "one" -> Some(1)
-        | "2"
-        | "two" -> Some(2)
-        | "3"
-        | "three" -> Some(3)
-        | "4"
-        | "four" -> Some(4)
-        | "5"
-        | "five" -> Some(5)
-        | "6"
-        | "six" -> Some(6)
-        | "7"
-        | "seven" -> Some(7)
-        | "8"
-        | "eight" -> Some(8)
-        | "9"
-        | "nine" -> Some(9)
-        | _ -> None
 
 let part2 : string -> string = fun input ->
-    let firstDigit = input |> Seq.windowed 5 |> Seq.map (fun slice -> slice |> String |> stringToNumber) |> Seq.find (fun x -> not x.IsNone)  |> Convert.ToString
-    let lastDigit = input |> Seq.windowed 5 |> Seq.rev |> Seq.map (fun slice -> slice |> String |> stringToNumber) |> Seq.find (fun x -> not x.IsNone) |> Convert.ToString
-    printf "%s" firstDigit
-    printf "%s" lastDigit
-    "5"
+    let firstDigit = ((input,true) |> getNumberInString).Value  |> Convert.ToString
+    let lastDigit = ((input,false) |> getNumberInString).Value |> Convert.ToString
+    firstDigit + lastDigit
 
 
 
@@ -125,7 +127,7 @@ else
             printf "Part1 Result: %i" resultSum
         | Some(Part2) -> 
             let results = input |> List.map (fun line ->
-                part1 line |> Int32.Parse
+                part2 line |> Int32.Parse
             )
             let resultSum =  results |> List.sum
             printf "Part2 Result: %i" resultSum
